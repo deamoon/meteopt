@@ -21,3 +21,4 @@ Good URL's
 * https://www.quantopian.com
 * https://cryptotrader.org
 * http://gbeced.github.io/pyalgotrade
+* http://habrahabr.ru/post/179343/
