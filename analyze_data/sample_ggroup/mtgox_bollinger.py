@@ -2,6 +2,11 @@
 # http://gbeced.github.io/pyalgotrade/docs/v0.14/html/mtgox_tutorial.html
 # http://gbeced.github.io/pyalgotrade/docs/v0.14/html/sample_bbands.html
 
+# Example resample
+# feed = mtgoxfeed.CSVTradeFeed()
+# feed.addBarsFromCSV("trades-mtgox-usd-2013-03.csv.bak")
+# resample.resample_to_csv(feed, 60*15, "resampled.csv")
+
 import time, math, os, sys, datetime
 from dateutil.relativedelta import relativedelta
 

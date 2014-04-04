@@ -28,12 +28,13 @@ transformers:
   connector: csv
   connector_options:
   property_map:
-    - property: last
-      external_name: last
-      # Type: Float Stats: 1 properties of this type in this kind.
-      import_transform: transform.none_if_empty(float)
     - property: updated
-      external_name: updated
-      # Type: Date/Time Stats: 1 properties of this type in this kind.
-      import_transform: transform.import_date_time('%Y-%m-%dT%H:%M:%S')
-      export_transform: transform.export_date_time('%Y-%m-%dT%H:%M:%S')
+      external_name: datetime      
+      import_transform: transform.import_date_time('%Y-%m-%d %H:%M:%S')
+      export_transform: transform.export_date_time('%Y-%m-%d %H:%M:%S')
+    - property: last
+      external_name: price      
+      import_transform: transform.none_if_empty(float)
+    - property: vol_cur
+      external_name: volume      
+      import_transform: transform.none_if_empty(float)
