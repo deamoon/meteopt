@@ -3,6 +3,8 @@ meteopt
 
 Trading library, optimizator, living bitcoin trade
 
+http://107.170.40.155
+
 Dependencies
 ------------
 

@@ -5,6 +5,7 @@ If you want to download new ticker's data from database run download_data.sh, re
 
 ```
 export PATH=$PATH:/home/deamoon/Downloads/google_appengine
+export PATH=$PATH:/home/deamoon/Downloads/google_appengine/lib
 
 cd /home/deamoon/Documents/bitcoin/google_app/appengine-django-skeleton
 
