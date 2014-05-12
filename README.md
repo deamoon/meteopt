@@ -24,3 +24,9 @@ Good URL's
 * https://cryptotrader.org
 * http://gbeced.github.io/pyalgotrade
 * http://habrahabr.ru/post/179343/
+
+Идеи улучшения pyalgotrade
+--------------------------
+
+* Написать удобный способ объединять стратегии в одну, для одновременного запуска и оптимизации
+* Пусть отчет генерируется в html, можно использовать plot.ly
