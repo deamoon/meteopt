@@ -1,7 +1,24 @@
-from random import *
+from random import random
+from random import randrange
+import threading
 
 class GeneticOptimizer:
-    def __init__(self, popsize, algorithm, arglow, arghigh, argdiscrete, mutation_chance = 0.01):
+
+    class CalculatingThread(threading.Thread):
+        def __init__(self, results, population, algorithm, start_index, step):
+            threading.Thread.__init__(self)
+            self.start_index = start_index
+            self.algorithm = algorithm
+            self.results = results
+            self.step = step
+            self.population = population
+        
+        def run(self):
+            size = len(self.results)
+            for i in range(self.start_index, size, self.step):
+                self.results[i] = self.algorithm(*self.population[i])
+        
+    def __init__(self, popsize, algorithm, arglow, arghigh, argdiscrete, mutation_chance = 0.01, num_of_threads = 4):
         self.algorithm = algorithm
         self.arglow = arglow
         self.arghigh = arghigh
@@ -9,6 +26,7 @@ class GeneticOptimizer:
         self.argdiscrete = argdiscrete
         self.popsize = popsize
         self.mutation_chance = mutation_chance
+        self.num_of_threads = num_of_threads
         
     def generate_new_argument_value(self, index):
         if (self.argdiscrete[index]):
@@ -24,8 +42,11 @@ class GeneticOptimizer:
     
     def calculate_results(self):
         self.results = [0] * self.popsize
-        for i in range(self.popsize):
-            self.results[i] = self.algorithm(*self.population[i])
+        threads = [self.CalculatingThread(self.results, self.population, self.algorithm, i, self.num_of_threads) for i in range(0, self.num_of_threads)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
             
     def count_survivability(self):
         self.calculate_results()
@@ -70,7 +91,8 @@ class GeneticOptimizer:
         for generation in range(generations):
             self.count_survivability()
             self.create_new_population()
-            self.mutate()
+            if generation == generations - 1:
+                self.mutate()
         self.calculate_results()
         
 def show(v):
@@ -78,4 +100,5 @@ def show(v):
     print('\n'.join([str(x) for x in a.population]))
     print('\n'.join([str(x) for x in a.results]))
         
-a = GeneticOptimizer(100, lambda a, b, c, d: a + b + c + d, [0, 0, 0, 0], [1, 5, 10, 1], [False, False, False, True], 0.01)
+a = GeneticOptimizer(100, lambda a, b, c, d: a + b + c + d, [0, 0, 0, 0], [1, 5, 10, 1], [True, True, True, True], 0.01)
+show(1)
