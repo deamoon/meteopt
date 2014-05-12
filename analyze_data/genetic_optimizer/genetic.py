@@ -5,25 +5,38 @@ import threading
 class GeneticOptimizer:
 
     class CalculatingThread(threading.Thread):
-        def __init__(self, results, population, algorithm, start_index, step):
+        def __init__(self, results, population, algorithm, start_index, step, wrapper):
             threading.Thread.__init__(self)
             self.start_index = start_index
             self.algorithm = algorithm
             self.results = results
             self.step = step
             self.population = population
+            self.wrapper = wrapper
         
         def run(self):
             size = len(self.results)
             for i in range(self.start_index, size, self.step):
-                self.results[i] = self.algorithm(*self.population[i])
+                if self.wrapper:
+                    self.results[i] = self.algorithm.resultFunction(*self.population[i])
+                else:
+                    self.results[i] = self.algorithm(*self.population[i])
         
-    def __init__(self, popsize, algorithm, arglow, arghigh, argdiscrete, mutation_chance = 0.01, num_of_threads = 4):
-        self.algorithm = algorithm
-        self.arglow = arglow
-        self.arghigh = arghigh
-        self.argcount = len(arglow)
-        self.argdiscrete = argdiscrete
+    def __init__(self, popsize, algorithm, arglow = None, arghigh = None, argdiscrete = None, mutation_chance = 0.01, num_of_threads = 4):
+        if (arglow == None):
+            self.algorithm_wrapper = True
+            self.algorithm = algorithm
+            self.arglow = algorithm.lowerBound
+            self.arghigh = algorithm.upperBound
+            self.argcount = len(self.arglow)
+            self.argdiscrete = [True] * argcount
+        else:
+            self.algorithm_wrapper = False
+            self.algorithm = algorithm
+            self.arglow = arglow
+            self.arghigh = arghigh
+            self.argcount = len(arglow)
+            self.argdiscrete = argdiscrete
         self.popsize = popsize
         self.mutation_chance = mutation_chance
         self.num_of_threads = num_of_threads
@@ -42,7 +55,7 @@ class GeneticOptimizer:
     
     def calculate_results(self):
         self.results = [0] * self.popsize
-        threads = [self.CalculatingThread(self.results, self.population, self.algorithm, i, self.num_of_threads) for i in range(0, self.num_of_threads)]
+        threads = [self.CalculatingThread(self.results, self.population, self.algorithm, i, self.num_of_threads, self.algorithm_wrapper) for i in range(0, self.num_of_threads)]
         for thread in threads:
             thread.start()
         for thread in threads:
@@ -53,11 +66,9 @@ class GeneticOptimizer:
         for i in range(self.popsize):
             self.results[i] = pow(self.results[i], 2)
         self.percentage_range = [0] * self.popsize
-        sum = 0
+        total = sum(self.results)
         for i in range(self.popsize):
-            sum += self.results[i]
-        for i in range(self.popsize):
-            self.percentage_range[i] = self.results[i] / sum
+            self.percentage_range[i] = float(self.results[i]) / total
         for i in range(1, self.popsize):
             self.percentage_range[i] += self.percentage_range[i - 1]
             
@@ -99,6 +110,6 @@ def show(v):
     a.run(v)
     print('\n'.join([str(x) for x in a.population]))
     print('\n'.join([str(x) for x in a.results]))
-        
-a = GeneticOptimizer(100, lambda a, b, c, d: a + b + c + d, [0, 0, 0, 0], [1, 5, 10, 1], [True, True, True, True], 0.01)
-show(1)
+
+if __name__ == '__main__':    
+    a = GeneticOptimizer(100, lambda a, b, c, d: a + b + c + d, [0, 0, 0, 0], [1, 5, 10, 1], [True, True, True, True], 0.01)
