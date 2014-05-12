@@ -10,6 +10,8 @@ from pyalgotrade.stratanalyzer import returns
 from pyalgotrade.technical import bollinger
 from pyalgotrade.technical import vwap
 from pyalgotrade.barfeed import yahoofeed
+from genetic_optimizer import genetic
+from genetic_optimizer import genetic_old
 
 class UnionStrategy(strategy.BaseStrategy):
     def __init__(self, feed, instrument, parametres, cash=10, comission=0.002):
@@ -73,7 +75,7 @@ class UnionStrategy(strategy.BaseStrategy):
             self.__position.exitMarket()
 
     def onEnterCanceled(self, position):
-        print "onEnterCanceled"
+        # print "onEnterCanceled"
         self.exitOrder += 1
         self.__position = None
 
@@ -90,7 +92,7 @@ class GeneticData:
         self.description = ("smaPeriod", "bBandsPeriod", "vwapWindowSize", "windowTrust")
         self.lowerBound = (5, 5, 5, 1)
         self.upperBound = (100, 100, 100, 10)
-        self.feed = None
+        self.parseData()
 
     def parseData(self):
         self.feed = coinfeed.Feed()
@@ -107,24 +109,39 @@ class GeneticData:
         self.feed.stop()
         self.feed.join()
 
-    def resultFunction2(self, parametres):
+    def resultFunction(self, parametres):
         assert(len(parametres) == len(self.lowerBound))
         self.feed = coinfeed.Feed()
+        startDate = datetime.datetime.strptime("2014-04-06 11:47:42", "%Y-%m-%d %H:%M:%S")
+        endDate   = datetime.datetime.strptime("2014-04-16 11:47:42", "%Y-%m-%d %H:%M:%S")
+        # self.feed.setDateRange(startDate, endDate) 
         self.feed.addBarsFromCSV("btc", "data/ticker.csv")                
         myStrategy = UnionStrategy(self.feed, "btc", parametres)
         myStrategy.run()
         return myStrategy.getResult()
 
-    def resultFunction(self, parametres):
-        assert(len(parametres) == len(self.lowerBound))
-        if self.feed is None:            
-            self.parseData()
-                
+    def resultFunction2(self, parametres):
+        assert(len(parametres) == len(self.lowerBound))            
+        
         feedToBuildOnEveryLoop = barfeed.OptimizerBarFeed(self.feed.getFrequency(), 
-            self.feed.getRegisteredInstruments(), self.bars)        
+        self.feed.getRegisteredInstruments(), self.bars)        
+        
         myStrategy = UnionStrategy(feedToBuildOnEveryLoop, "btc", parametres)
         myStrategy.run()
         return myStrategy.getResult()    
+
+
+def resultFunction3(a,b,c,d):
+    parametres = [a, b, c, d]
+    assert(len(parametres) == 4)
+    feed = coinfeed.Feed()
+    startDate = datetime.datetime.strptime("2014-04-06 11:47:42", "%Y-%m-%d %H:%M:%S")
+    endDate   = datetime.datetime.strptime("2014-04-16 11:47:42", "%Y-%m-%d %H:%M:%S")
+    # feed.setDateRange(startDate, endDate)        
+    feed.addBarsFromCSV("btc", "data/ticker.csv")                
+    myStrategy = UnionStrategy(feed, "btc", parametres)
+    myStrategy.run()
+    return myStrategy.getResult()
 
 def parameters_generator():
     smaPeriod = range(5, 100)
@@ -137,9 +154,9 @@ def main():
     opt.run(parameters_generator(), resultFunction)
 
 def plot():
-    feed = coinfeed.Feed()    
+    feed = coinfeed.Feed()        
     feed.addBarsFromCSV("btc", "data/ticker.csv")
-    myStrategy = UnionStrategy(feed, "btc", [30,5,10])
+    myStrategy = UnionStrategy(feed, "btc", [27, 56, 76, 3])
     plt = plotter.StrategyPlotter(myStrategy)    
     myStrategy.run()
     myStrategy.info("Final portfolio value: $%.2f" % myStrategy.getResult())
@@ -158,5 +175,18 @@ def whySoSlow():
     print gdata.resultFunction((30, 5, 10, 3))
     print gdata.resultFunction((30, 5, 10, 4))
 
+def opt():
+    d = GeneticData()    
+    g = genetic.GeneticOptimizer(10, d, num_of_threads = 1)
+    #g = genetic.GeneticOptimizer(3, resultFunction3, 
+    #   d.lowerBound, d.upperBound, [True, True, True, True],)
+    g.run(6)
+    print '\n'.join([str(x) for x in g.population])
+    print '\n'.join([str(x) for x in g.results])
+
 if __name__ == '__main__':
-    whySoSlow()
+    # opt()
+    # exit()
+    d = GeneticData()
+    print d.resultFunction([36, 5, 27, 1])
+    print resultFunction3(36, 5, 27, 1)
