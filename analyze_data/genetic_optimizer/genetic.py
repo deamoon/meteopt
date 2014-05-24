@@ -1,3 +1,7 @@
+# MeteOpt
+#
+# Copyright 2014 Kamil Musin
+
 from random import random
 from random import randrange
 import threading
