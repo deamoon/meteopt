@@ -5,6 +5,12 @@ Trading library, optimizator, living bitcoin trade
 
 http://107.170.40.155
 
+Разарботчики
+------------
+
+* Мусин Камиль
+* Ивановский Дмитрий
+
 Dependencies
 ------------
 
