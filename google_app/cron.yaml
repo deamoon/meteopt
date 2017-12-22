@@ -1,4 +1,0 @@
-cron:
-- description: every 5 minutes add new Ticker in Base
-  url: /add_ticker
-  schedule: every 5 minutes
